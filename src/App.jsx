@@ -5,7 +5,7 @@ import Stats from "./Stats";
 
 
 
-import QuickActions from "./QuickActions";
+
 
 
 
@@ -23,7 +23,7 @@ import {
   navLinks,
 } from "./data/mockData";
 import "./App.css";
-import { Modal, AddWorkoutForm, LogWaterForm, UpdateWeightForm, BMICalculatorForm, AddGoalForm } from "./Forms";
+import { Modal, AddWorkoutForm, AddGoalForm } from "./Forms";
 
 // ==============================================================
 // App Component (the ROOT of the whole application)
@@ -111,28 +111,6 @@ function App() {
     updateStat("workouts", workoutsStat.value + 1);
     setActiveModal(null);
   }
-
-  // Add water: increases the "Water" stat by the logged amount
-  function handleLogWater(amountLiters) {
-    const waterStat = stats.find((s) => s.id === "water");
-    const newTotal = Math.round((waterStat.value + amountLiters) * 100) / 100;
-    updateStat("water", newTotal);
-    setActiveModal(null);
-  }
-
-  // Update weight: overwrites the "Weight" stat and updates the
-  // "Currently X kg" text inside any matching goal
-  function handleUpdateWeight(newWeight) {
-    updateStat("weight", newWeight);
-    setGoals((prev) => prev.map((g) => (g.unit === "kg" ? { ...g, current: newWeight } : g)));
-    setActiveModal(null);
-  }
-
-  // BMI calculated: overwrite the "BMI" stat with the new value
-  function handleBMICalculated(bmiValue) {
-    updateStat("bmi", bmiValue);
-  }
-
   // Add a new goal card, calculating its initial progress %
   function handleAddGoal(goalData) {
     const { title, current, target, unit } = goalData;
@@ -150,7 +128,7 @@ function App() {
     setActiveModal(null);
   }
 
-  const weightStat = stats.find((s) => s.id === "weight");
+  
 
   return (
     <div className="app-layout">
@@ -180,12 +158,7 @@ function App() {
           onAddGoalClick={() => setActiveModal("goal")}
         />
 
-        <QuickActions
-          onLogWater={() => setActiveModal("water")}
-          onUpdateWeight={() => setActiveModal("weight")}
-          onCalculateBMI={() => setActiveModal("bmi")}
-          onAddGoal={() => setActiveModal("goal")}
-        />
+        
       </main>
 
       {/* --- Modals: only one can be open at a time, controlled by activeModal --- */}
@@ -195,24 +168,7 @@ function App() {
         </Modal>
       )}
 
-      {activeModal === "water" && (
-        <Modal title="Log Water" onClose={() => setActiveModal(null)}>
-          <LogWaterForm onLogWater={handleLogWater} />
-        </Modal>
-      )}
-
-      {activeModal === "weight" && (
-        <Modal title="Update Weight" onClose={() => setActiveModal(null)}>
-          <UpdateWeightForm currentWeight={weightStat.value} onUpdateWeight={handleUpdateWeight} />
-        </Modal>
-      )}
-
-      {activeModal === "bmi" && (
-        <Modal title="Calculate BMI" onClose={() => setActiveModal(null)}>
-          <BMICalculatorForm defaultWeight={weightStat.value} onCalculated={handleBMICalculated} />
-        </Modal>
-      )}
-
+      
       {activeModal === "goal" && (
         <Modal title="Add Goal" onClose={() => setActiveModal(null)}>
           <AddGoalForm onAddGoal={handleAddGoal} />
