@@ -2,27 +2,31 @@ import React from "react";
 import StatCard from "./StatCard";
 import "./StatsRow.css";
 
-// ==============================================================
-// StatsRow Component
-// --------------------------------------------------------------
-// Props:
-//   - stats: array of stat objects from mockData.js
-// Simply loops over the stats array and renders a <StatCard />
-// for each entry. This is the "list rendering" pattern in React.
-// ==============================================================
+const tones = {
+  Workouts: ["dumbbell", "blue"],
+  Calories: ["flame", "red"],
+  Weight: ["scale", "teal"],
+  Water: ["droplet", "blue"],
+  BMI: ["bmi", "slate"],
+};
+
 function StatsRow({ stats }) {
   return (
-    <div className="stats-row">
-      {stats.map((stat) => (
-        <StatCard
-          key={stat.id}
-          icon={stat.icon}
-          label={stat.label}
-          value={stat.value}
-          unit={stat.unit}
-        />
-      ))}
-    </div>
+    <section className="stats-row" aria-label="Weekly health summary">
+      {stats.map((stat) => {
+        const [icon, tone] = tones[stat.label] || ["activity", "blue"];
+        return (
+          <StatCard
+            key={stat.id}
+            icon={icon}
+            label={stat.label}
+            value={stat.value}
+            unit={stat.unit}
+            tone={tone}
+          />
+        );
+      })}
+    </section>
   );
 }
 

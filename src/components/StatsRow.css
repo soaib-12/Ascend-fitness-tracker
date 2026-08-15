@@ -1,12 +1,26 @@
-/* ==============================================================
-   StatsRow.css
-   Horizontal flex row that holds the 5 StatCards, wraps on
-   smaller screens.
-   ============================================================== */
-
 .stats-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 1180px) {
+  .stats-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .stats-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+}
+
+@media (max-width: 390px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,106 +1,127 @@
-/* ==============================================================
-   TodaysActivity.css
-   Styles for the "Today's Activity" card (progress bar + checklist)
-   ============================================================== */
-
 .today-card {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 22px;
-  margin-bottom: 20px;
+  min-width: 0;
+  padding: 29px 27px 27px;
+  border-radius: 14px;
 }
 
 .today-title {
-  margin: 0 0 18px 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
+  margin: 0 0 24px;
+  color: #101828;
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+  font-weight: 600;
 }
 
 .progress-header {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
-  color: #374151;
-  margin-bottom: 8px;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #344054;
+  font-size: 15px;
 }
 
 .progress-percent {
-  color: #2563eb;
-  font-weight: 700;
+  color: #0d5dcc;
+  font-weight: 600;
+}
+
+.progress-track,
+.goal-track {
+  width: 100%;
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dbe5fb;
+}
+
+.progress-fill,
+.goal-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue);
+  transition: width .3s ease;
 }
 
 .progress-track {
-  width: 100%;
-  height: 8px;
-  background-color: #e5e7eb;
-  border-radius: 999px;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.progress-fill {
-  height: 100%;
-  background-color: #2563eb;
-  border-radius: 999px;
-  transition: width 0.3s ease;
+  margin-bottom: 26px;
 }
 
 .activity-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
 .activity-item {
+  min-height: 63px;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 14px;
-  background-color: #f9fafb;
-  border: 1px solid #eef0f3;
-  border-radius: 12px;
-  cursor: pointer;
+  gap: 13px;
+  padding: 9px 14px;
+  border: 1px solid #cbd3e0;
+  border-radius: 9px;
+  background: #fff;
+  color: #101828;
   text-align: left;
-  font-size: 15px;
-  color: #111827;
-  transition: background-color 0.15s ease;
+  cursor: pointer;
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
 }
 
 .activity-item:hover {
-  background-color: #f3f4f6;
+  border-color: #aeb9ca;
+  box-shadow: 0 3px 10px rgba(16, 24, 40, .045);
 }
 
 .activity-icon {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
   border-radius: 50%;
-  background-color: #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #475467;
+  background: #e9ecf1;
+}
+
+.activity-icon-done {
+  color: #0a6b68;
+  background: #50e6dc;
 }
 
 .activity-name {
   flex: 1;
+  min-width: 0;
+  color: #101828;
+  font-size: 15px;
   font-weight: 500;
 }
 
 .activity-check {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  display: grid;
+  place-items: center;
+  border: 1.7px solid #667085;
   border-radius: 50%;
-  border: 2px solid #d1d5db;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  color: white;
+  color: #fff;
 }
 
 .activity-check-done {
-  background-color: #22c55e;
-  border-color: #22c55e;
+  border-color: #087d76;
+  background: #087d76;
+}
+
+
+@media (max-width: 700px) {
+  .today-card {
+    padding: 22px 18px;
+  }
+
+  .today-title {
+    font-size: 23px;
+  }
 }

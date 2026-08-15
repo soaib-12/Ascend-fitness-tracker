@@ -63,6 +63,7 @@ function App() {
   );
   const [goals, setGoals] = useState(() => loadState("ascend-goals", initialGoals));
   const [activePage, setActivePage] = useState("dashboard");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // null | "workout" | "water" | "weight" | "bmi" | "goal"
 
   // ---- Persist state to localStorage any time it changes ----
@@ -157,11 +158,13 @@ function App() {
         activePage={activePage}
         onNavClick={setActivePage}
         onAddWorkoutClick={() => setActiveModal("workout")}
+        mobileOpen={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
       />
 
       {/* --- Main dashboard content --- */}
       <main className="main-content">
-        <Header userName={user.name} date={user.date} avatarUrl={user.avatarUrl} />
+        <Header userName={user.name} date={user.date} avatarUrl={user.avatarUrl} onMenuClick={() => setMobileNavOpen(true)} />
 
         <StatsRow stats={stats} />
 

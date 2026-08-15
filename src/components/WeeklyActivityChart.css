@@ -1,70 +1,144 @@
-/* ==============================================================
-   WeeklyActivityChart.css
-   Styles for the bar chart card.
-   ============================================================== */
+.chart-card,
+.today-card,
+.goals-card,
+.quick-action-card {
+  border: 1px solid #edf0f5;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
 
 .chart-card {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 24px;
-  flex: 2;
+  min-width: 0;
+  min-height: 540px;
+  padding: 29px 30px 22px;
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
 }
 
+.chart-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
 .chart-title {
-  margin: 0 0 24px 0;
-  font-size: 22px;
-  font-weight: 700;
-  color: #111827;
+  margin: 0;
+  color: #101828;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+  font-weight: 600;
+}
+
+.chart-subtitle {
+  margin: 8px 0 0;
+  color: #98a2b3;
+  font-size: 13px;
+}
+
+.chart-body {
+  position: relative;
+  flex: 1;
+  min-height: 390px;
+  margin-top: 25px;
+}
+
+.chart-grid {
+  position: absolute;
+  inset: 12px 8px 42px;
+  pointer-events: none;
+}
+
+.chart-grid span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #f0f2f5;
 }
 
 .chart-bars {
-  flex: 1;
+  position: absolute;
+  inset: 12px 4px 0;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: stretch;
   gap: 12px;
-  min-height: 300px;
 }
 
 .chart-column {
+  min-width: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100%;
-  justify-content: flex-end;
+}
+
+.chart-value {
+  height: 20px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .chart-bar-track {
   width: 100%;
-  height: 100%;
+  flex: 1;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  border-bottom: 1px solid #e9edf3;
 }
 
 .chart-bar {
-  width: 60%;
-  background-color: #e5e7eb;
-  border-radius: 6px 6px 0 0;
-  min-height: 4px;
-  transition: height 0.3s ease;
+  width: min(48px, 58%);
+  min-height: 0;
+  border-radius: 7px 7px 3px 3px;
+  background: #d9e1ed;
+  transition: height .25s ease, background .2s ease;
+}
+
+.chart-bar:hover {
+  background: #b7c6db;
 }
 
 .chart-bar-active {
-  background-color: #2563eb;
+  background: var(--blue);
+}
+
+.chart-bar-active:hover {
+  background: var(--blue-dark);
 }
 
 .chart-day-label {
-  margin-top: 12px;
-  font-size: 13px;
-  color: #9ca3af;
+  height: 30px;
+  padding-top: 10px;
+  color: #667085;
+  font-size: 12.5px;
+  font-weight: 500;
 }
 
 .chart-day-active {
-  color: #111827;
+  color: #101828;
   font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .chart-card {
+    min-height: 430px;
+    padding: 23px 18px 18px;
+  }
+
+  .chart-title {
+    font-size: 23px;
+  }
+
+  .chart-body {
+    min-height: 290px;
+  }
+
+  .chart-bars {
+    gap: 5px;
+  }
 }

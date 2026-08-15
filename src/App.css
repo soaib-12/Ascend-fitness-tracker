@@ -1,43 +1,121 @@
-/* ==============================================================
-   App.css
-   Top-level layout styles: the sidebar + main content split,
-   and the two-column area (chart + right column).
-   ============================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f3f4f6;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+:root {
+  --bg: #f8f9fc;
+  --sidebar-bg: #f4f5f8;
+  --surface: #ffffff;
+  --text: #111827;
+  --muted: #667085;
+  --muted-2: #98a2b3;
+  --line: #e7eaf0;
+  --line-strong: #d0d5dd;
+  --blue: #1264d6;
+  --blue-dark: #0d56bd;
+  --blue-soft: #eaf2ff;
+  --shadow: 0 8px 28px rgba(16, 24, 40, 0.045);
 }
 
-.main-content {
-  flex: 1;
-  padding: 32px 40px;
+* {
   box-sizing: border-box;
 }
 
-/* Chart card (left, wider) + right column (TodaysActivity + ActiveGoals) */
-.dashboard-columns {
+html {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  width: 100%;
+  margin: 0;
+  min-width: 320px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-layout {
   display: flex;
-  gap: 20px;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.main-content {
+  flex: 1 1 auto;
+  width: calc(100% - 275px);
+  min-width: 0;
+  padding: 38px clamp(28px, 3vw, 54px) 48px;
+}
+
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 2.05fr) minmax(320px, 0.95fr);
+  gap: 24px;
   align-items: stretch;
 }
 
 .dashboard-right-column {
-  flex: 1;
-  min-width: 300px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 24px;
+  min-width: 0;
 }
 
-/* Responsive: stack everything on narrow screens */
-@media (max-width: 900px) {
-  .app-layout {
-    flex-direction: column;
+@media (max-width: 1200px) {
+  .main-content {
+    padding-inline: 28px;
   }
 
   .dashboard-columns {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.95fr);
+    gap: 18px;
+  }
+
+  .dashboard-right-column {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 980px) {
+  .main-content {
+    width: 100%;
+    padding: 28px 22px 36px;
+  }
+
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-right-column {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .main-content {
+    padding: 18px 16px 30px;
+  }
+
+  .dashboard-right-column {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
