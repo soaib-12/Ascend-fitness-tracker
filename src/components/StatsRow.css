@@ -1,0 +1,12 @@
+/* ==============================================================
+   StatsRow.css
+   Horizontal flex row that holds the 5 StatCards, wraps on
+   smaller screens.
+   ============================================================== */
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}

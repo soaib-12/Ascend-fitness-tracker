@@ -1,0 +1,38 @@
+/* ==============================================================
+   StatCard.css
+   Styles for a single stat summary card.
+   ============================================================== */
+
+.stat-card {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.stat-card-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.stat-icon {
+  font-size: 15px;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.stat-unit {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
