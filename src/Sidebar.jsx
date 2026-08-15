@@ -1,6 +1,5 @@
 import React from "react";
 import Icon from "./Icon";
-import "./Sidebar.css";
 
 const iconMap = {
   dashboard: "grid",

@@ -1,6 +1,13 @@
 import React from "react";
 import Icon from "./Icon";
-import "./StatCard.css";
+
+const tones = {
+  Workouts: ["dumbbell", "blue"],
+  Calories: ["flame", "red"],
+  Weight: ["scale", "teal"],
+  Water: ["droplet", "blue"],
+  BMI: ["bmi", "slate"],
+};
 
 function StatCard({ icon, label, value, unit, tone = "blue" }) {
   return (
@@ -17,4 +24,15 @@ function StatCard({ icon, label, value, unit, tone = "blue" }) {
   );
 }
 
-export default StatCard;
+function Stats({ stats }) {
+  return (
+    <section className="stats-row" aria-label="Weekly health summary">
+      {stats.map((stat) => {
+        const [icon, tone] = tones[stat.label] || ["activity", "blue"];
+        return <StatCard key={stat.id} icon={icon} label={stat.label} value={stat.value} unit={stat.unit} tone={tone} />;
+      })}
+    </section>
+  );
+}
+
+export default Stats;

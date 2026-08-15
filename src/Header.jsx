@@ -1,6 +1,5 @@
 import React from "react";
 import Icon from "./Icon";
-import "./Header.css";
 
 function Header({ userName, date, avatarUrl, onMenuClick }) {
   return (

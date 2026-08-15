@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "./components/Sidebar";
-import Header from "./components/Header";
-import StatsRow from "./components/StatsRow";
-import WeeklyActivityChart from "./components/WeeklyActivityChart";
-import TodaysActivity from "./components/TodaysActivity";
-import ActiveGoals from "./components/ActiveGoals";
-import QuickActions from "./components/QuickActions";
-import Modal from "./components/Modal";
-import AddWorkoutForm from "./components/AddWorkoutForm";
-import LogWaterForm from "./components/LogWaterForm";
-import UpdateWeightForm from "./components/UpdateWeightForm";
-import BMICalculatorForm from "./components/BMICalculatorForm";
-import AddGoalForm from "./components/AddGoalForm";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import Stats from "./Stats";
+
+
+
+import QuickActions from "./QuickActions";
+
+
+
+
+
+
+import Activity from "./Activity";
 import {
   initialUser,
   initialStats,
@@ -22,6 +23,7 @@ import {
   navLinks,
 } from "./data/mockData";
 import "./App.css";
+import { Modal, AddWorkoutForm, LogWaterForm, UpdateWeightForm, BMICalculatorForm, AddGoalForm } from "./Forms";
 
 // ==============================================================
 // App Component (the ROOT of the whole application)
@@ -166,17 +168,17 @@ function App() {
       <main className="main-content">
         <Header userName={user.name} date={user.date} avatarUrl={user.avatarUrl} onMenuClick={() => setMobileNavOpen(true)} />
 
-        <StatsRow stats={stats} />
+        <Stats stats={stats} />
 
         {/* Chart + right-hand column sit side by side */}
-        <div className="dashboard-columns">
-          <WeeklyActivityChart data={initialWeeklyActivity} currentDay={currentDay} />
-
-          <div className="dashboard-right-column">
-            <TodaysActivity activities={activities} onToggleActivity={handleToggleActivity} />
-            <ActiveGoals goals={goals} onAddGoalClick={() => setActiveModal("goal")} />
-          </div>
-        </div>
+        <Activity
+          weeklyData={initialWeeklyActivity}
+          currentDay={currentDay}
+          activities={activities}
+          onToggleActivity={handleToggleActivity}
+          goals={goals}
+          onAddGoalClick={() => setActiveModal("goal")}
+        />
 
         <QuickActions
           onLogWater={() => setActiveModal("water")}
