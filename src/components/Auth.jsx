@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import './Auth.css';
 
-export default function Auth() {
-  const [isLoginView, setIsLoginView] = useState(true);
+export default function Auth({ initialMode = 'login', onBack, onAuthenticated }) {
+  const [isLoginView, setIsLoginView] = useState(initialMode !== 'signup');
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -17,23 +17,6 @@ export default function Auth() {
     goal: '',
   });
 
-  const toggleView = () => {
-    setLoginEmail('');
-    setLoginPassword('');
-
-    setRegData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      height: '',
-      weight: '',
-      goal: '',
-    });
-
-    setIsLoginView(!isLoginView);
-  };
-
   const handleRegInput = (e) => {
     setRegData({ ...regData, [e.target.name]: e.target.value });
   };
@@ -41,6 +24,7 @@ export default function Auth() {
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     console.log('Logging in with:', loginEmail, loginPassword);
+    onAuthenticated?.();
   };
 
   const handleRegisterSubmit = (e) => {
@@ -50,10 +34,16 @@ export default function Auth() {
       return;
     }
     console.log('Registering user payload:', regData);
+    onAuthenticated?.();
   };
 
   return (
     <div className="auth-container">
+      {onBack && (
+        <button type="button" onClick={onBack} className="toggle-btn">
+          Back to home
+        </button>
+      )}
       {/*Title & Header*/}
       <div className="auth-header">
         <img
