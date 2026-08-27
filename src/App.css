@@ -931,7 +931,7 @@ button {
 
 
 /* ===== QuickActions.css ===== */
-/*.quick-actions-row {
+.quick-actions-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
@@ -1003,7 +1003,7 @@ button {
   .quick-action-label {
     font-size: 13px;
   }
-}*/
+}
 
 
 /* ===== Modal.css ===== */
