@@ -1,5 +1,10 @@
 import { useState } from 'react';
 import './Auth.css';
+import {
+  registerUser,
+  loginUser,
+  fetchCurrentUser,
+} from '../services/api';
 
 export default function Auth({ initialMode = 'login', onBack, onAuthenticated }) {
   const [isLoginView, setIsLoginView] = useState(initialMode !== 'signup');
@@ -19,43 +24,66 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
   });
 
   const handleRegInput = (e) => {
-    setRegData({ ...regData, [e.target.name]: e.target.value });
-  };
-
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    onAuthenticated?.({
-      email: loginEmail,
-      date: new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
+    setRegData({
+      ...regData,
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+      const response = await loginUser({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      const { token } = response.data;
+
+      localStorage.setItem('token', token);
+
+      const userResponse = await fetchCurrentUser();
+
+      onAuthenticated?.(userResponse.data.user);
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          'Login failed. Please check your email and password.'
+      );
+    }
+  };
+
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+
     if (regData.password !== regData.confirmPassword) {
       alert('Passwords do not match!');
       return;
     }
 
-    const payload = {
-      name: regData.name,
-      email: regData.email,
-      age: regData.age ? Number(regData.age) : '',
-      height: regData.height ? Number(regData.height) : '',
-      weight: regData.weight ? Number(regData.weight) : '',
-      fitnessGoal: regData.goal,
-      date: new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-    };
+    try {
+      const response = await registerUser({
+        name: regData.name,
+        email: regData.email,
+        password: regData.password,
+        age: Number(regData.age),
+        height: Number(regData.height),
+        weight: Number(regData.weight),
+        fitnessGoal: regData.goal,
+      });
 
-    onAuthenticated?.(payload);
+      alert(response.data.message);
+
+      setIsLoginView(true);
+      setLoginEmail(regData.email);
+      setLoginPassword('');
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          'Registration failed. Please try again.'
+      );
+    }
   };
 
   return (
@@ -72,7 +100,9 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
           alt="Ascend Fitness Logo"
           className="auth-logo"
         />
+
         <h2>{isLoginView ? 'Welcome back' : 'Set up your profile'}</h2>
+
         <p>
           {isLoginView
             ? 'Continue your wellness journey.'
@@ -153,6 +183,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
                   onChange={handleRegInput}
                 />
               </div>
+
               <div className="form-group">
                 <label>Confirm Password</label>
                 <input
@@ -165,7 +196,6 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
               </div>
             </div>
 
-            {/* Age, Height & Weight Row */}
             <div className="form-row">
               <div className="form-group">
                 <label>Age</label>
@@ -179,6 +209,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
                   onChange={handleRegInput}
                 />
               </div>
+
               <div className="form-group">
                 <label>Height (cm)</label>
                 <input
@@ -189,6 +220,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
                   onChange={handleRegInput}
                 />
               </div>
+
               <div className="form-group">
                 <label>Weight (kg)</label>
                 <input
@@ -203,6 +235,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
 
             <div className="form-group">
               <label>Fitness Goal</label>
+
               <select
                 name="goal"
                 value={regData.goal}
@@ -210,9 +243,15 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
                 onChange={handleRegInput}
               >
                 <option value="">Select your goal</option>
-                <option value="full_transformation">Full Body Transformation</option>
-                <option value="weight_loss">Weight Loss</option>
-                <option value="mass_gain">Mass Gain</option>
+                <option value="full_transformation">
+                  Full Body Transformation
+                </option>
+                <option value="weight_loss">
+                  Weight Loss
+                </option>
+                <option value="mass_gain">
+                  Mass Gain
+                </option>
               </select>
             </div>
 

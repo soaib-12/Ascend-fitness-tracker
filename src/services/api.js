@@ -2,22 +2,30 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
 // Automatically send JWT token with protected requests
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
-// Post signup data
-export const registerUser = (userData) => API.post("/auth/signup", userData);
+// Register a new user
+export const registerUser = (userData) =>
+  API.post("/auth/signup", userData);
 
-// Fetch current user profile details for profile page
-export const fetchUserProfile = () => API.get("/user/profile");
+// Login existing user
+export const loginUser = (credentials) =>
+  API.post("/auth/login", credentials);
+
+// Get currently authenticated user
+export const fetchCurrentUser = () =>
+  API.get("/auth/me");
 
 export default API;
