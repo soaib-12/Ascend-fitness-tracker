@@ -65,10 +65,19 @@ function Sidebar({ navLinks, activePage, onNavClick, onAddWorkoutClick, mobileOp
     <Icon name="user" size={20} />
     <span>Profile</span>
   </button>
-  <button className="nav-item">
+
+  {/* UPDATED: Added onClick handler and active class */}
+  <button 
+    className={`nav-item ${activePage === "settings" ? "nav-item-active" : ""}`}
+    onClick={() => {
+      onNavClick("settings");
+      onClose();
+    }}
+  >
     <Icon name="settings" size={20} />
     <span>Settings</span>
   </button>
+
   <button className="nav-item">
     <Icon name="logout" size={20} />
     <span>Logout</span>

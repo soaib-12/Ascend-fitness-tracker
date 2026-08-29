@@ -7,6 +7,8 @@ import Stats from "./Stats";
 import QuickActions from "./QuickActions";
 import Activity from "./Activity";
 import Profile from "./components/Profile";
+import Settings from "./components/Settings";
+
 import {
   initialUser,
   initialStats,
@@ -69,6 +71,13 @@ function App() {
       setUser((prev) => ({ ...prev, ...userData }));
     }
     setCurrentView("dashboard");
+  }
+
+  function handleUpdateUser(updatedFields) {
+    setUser((prev) => ({ ...prev, ...updatedFields }));
+    if (updatedFields.weight) {
+      updateStat("weight", Number(updatedFields.weight));
+    }
   }
 
   function updateStat(id, newValue) {
@@ -165,6 +174,8 @@ function App() {
 
         {activePage === "profile" ? (
           <Profile user={user} />
+        ) : activePage === "settings" ? (
+          <Settings user={user} onUpdateUser={handleUpdateUser} />
         ) : (
           <>
             <Stats stats={stats || []} />

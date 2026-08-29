@@ -39,4 +39,5 @@ export const navLinks = [
   { id: "health", label: "Health" },
   { id: "goals", label: "Goals" },
   { id: "progress", label: "Progress" },
+  { id: "settings", label: "Settings" },
 ];
