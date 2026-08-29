@@ -12,6 +12,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
     email: '',
     password: '',
     confirmPassword: '',
+    age: '',
     height: '',
     weight: '',
     goal: '',
@@ -23,8 +24,14 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    console.log('Logging in with:', loginEmail, loginPassword);
-    onAuthenticated?.();
+    onAuthenticated?.({
+      email: loginEmail,
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    });
   };
 
   const handleRegisterSubmit = (e) => {
@@ -33,8 +40,22 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
       alert('Passwords do not match!');
       return;
     }
-    console.log('Registering user payload:', regData);
-    onAuthenticated?.();
+
+    const payload = {
+      name: regData.name,
+      email: regData.email,
+      age: regData.age ? Number(regData.age) : '',
+      height: regData.height ? Number(regData.height) : '',
+      weight: regData.weight ? Number(regData.weight) : '',
+      fitnessGoal: regData.goal,
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    };
+
+    onAuthenticated?.(payload);
   };
 
   return (
@@ -44,23 +65,23 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
           Back to home
         </button>
       )}
-      {/*Title & Header*/}
+
       <div className="auth-header">
         <img
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqbO3NDSeq7NljSJkZkgEce9cZlv08cDb09ISGTiWBqWskpOyW1Bz4FdFMGatsj5s-0uXblPLxfiXuwqitpOPRwP45fOAKDqguZPYR9jSyrzIIRH-dmZyyCpbQCQvp4__ETwcS_EA-9eLIgoJcEA0CzwaF7U_71JB8ojRkF7BNd-pWHFNxYZM0SuPp0yZinNU7IURF4LIa-7Soa9_UXNYubCOR6JBOyX-IASCLwpj3PbU67QS7Z4S3"
-            alt="Ascend Fitness Logo"
-            className="auth-logo"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqbO3NDSeq7NljSJkZkgEce9cZlv08cDb09ISGTiWBqWskpOyW1Bz4FdFMGatsj5s-0uXblPLxfiXuwqitpOPRwP45fOAKDqguZPYR9jSyrzIIRH-dmZyyCpbQCQvp4__ETwcS_EA-9eLIgoJcEA0CzwaF7U_71JB8ojRkF7BNd-pWHFNxYZM0SuPp0yZinNU7IURF4LIa-7Soa9_UXNYubCOR6JBOyX-IASCLwpj3PbU67QS7Z4S3"
+          alt="Ascend Fitness Logo"
+          className="auth-logo"
         />
         <h2>{isLoginView ? 'Welcome back' : 'Set up your profile'}</h2>
         <p>
-          {isLoginView ? 'Continue your wellness journey.' : 'Start your personalized fitness path today.'}
+          {isLoginView
+            ? 'Continue your wellness journey.'
+            : 'Start your personalized fitness path today.'}
         </p>
       </div>
 
-      {/*Main Card*/}
       <div className="auth-card">
         {isLoginView ? (
-          /* LOGIN*/
           <form onSubmit={handleLoginSubmit} className="auth-form">
             <div className="form-group">
               <label>Email address</label>
@@ -88,49 +109,106 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
 
             <p className="toggle-text">
               New to Ascend?{' '}
-              <button type="button" onClick={() => setIsLoginView(false)} className="toggle-btn">
+              <button
+                type="button"
+                onClick={() => setIsLoginView(false)}
+                className="toggle-btn"
+              >
                 Create an account
               </button>
             </p>
           </form>
         ) : (
-          /*REGISTRATION FORM*/
           <form onSubmit={handleRegisterSubmit} className="auth-form">
             <div className="form-group">
               <label>Full Name</label>
-              <input type="text" name="name" required onChange={handleRegInput} />
+              <input
+                type="text"
+                name="name"
+                value={regData.name}
+                required
+                onChange={handleRegInput}
+              />
             </div>
 
             <div className="form-group">
               <label>Email address</label>
-              <input type="email" name="email" required onChange={handleRegInput} />
+              <input
+                type="email"
+                name="email"
+                value={regData.email}
+                required
+                onChange={handleRegInput}
+              />
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label>Password</label>
-                <input type="password" name="password" required onChange={handleRegInput} />
+                <input
+                  type="password"
+                  name="password"
+                  value={regData.password}
+                  required
+                  onChange={handleRegInput}
+                />
               </div>
               <div className="form-group">
                 <label>Confirm Password</label>
-                <input type="password" name="confirmPassword" required onChange={handleRegInput} />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={regData.confirmPassword}
+                  required
+                  onChange={handleRegInput}
+                />
               </div>
             </div>
 
+            {/* Age, Height & Weight Row */}
             <div className="form-row">
               <div className="form-group">
+                <label>Age</label>
+                <input
+                  type="number"
+                  name="age"
+                  min="1"
+                  max="120"
+                  value={regData.age}
+                  required
+                  onChange={handleRegInput}
+                />
+              </div>
+              <div className="form-group">
                 <label>Height (cm)</label>
-                <input type="number" name="height" required onChange={handleRegInput} />
+                <input
+                  type="number"
+                  name="height"
+                  value={regData.height}
+                  required
+                  onChange={handleRegInput}
+                />
               </div>
               <div className="form-group">
                 <label>Weight (kg)</label>
-                <input type="number" name="weight" required onChange={handleRegInput} />
+                <input
+                  type="number"
+                  name="weight"
+                  value={regData.weight}
+                  required
+                  onChange={handleRegInput}
+                />
               </div>
             </div>
 
             <div className="form-group">
               <label>Fitness Goal</label>
-              <select name="goal" required onChange={handleRegInput}>
+              <select
+                name="goal"
+                value={regData.goal}
+                required
+                onChange={handleRegInput}
+              >
                 <option value="">Select your goal</option>
                 <option value="full_transformation">Full Body Transformation</option>
                 <option value="weight_loss">Weight Loss</option>
@@ -144,7 +222,11 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
 
             <p className="toggle-text">
               Already have an account?{' '}
-              <button type="button" onClick={() => setIsLoginView(true)} className="toggle-btn">
+              <button
+                type="button"
+                onClick={() => setIsLoginView(true)}
+                className="toggle-btn"
+              >
                 Sign in
               </button>
             </p>
