@@ -3,38 +3,38 @@ import User from "../model/user.js";
 import jwt from "jsonwebtoken";
 export const signup = async (req, res) => {
     try {
-const { name, email, password, age, height, weight, fitnessGoal } = req.body;
-        const existingUser = await User.findOne({ email });
+        const { name, email, password, age, height, weight, fitnessGoal } = req.body;
+            const existingUser = await User.findOne({ email });
 
-        if (existingUser) {
-            return res.status(400).json({
-                message: "User already exists",
-            });
-        }
+                if (existingUser) {
+                    return res.status(400).json({
+                    message: "User already exists",
+                });
+            }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = await User.create({
-    name,
-    email,
-    password: hashedPassword,
-    age,
-    height,
-    weight,
-    fitnessGoal,
-});
+            name,
+            email,
+            password: hashedPassword,
+            age,
+            height,
+            weight,
+            fitnessGoal,
+        });
 
         res.status(201).json({
             message: "User created successfully",
             user: {
-    id: user._id,
-    name: user.name,
-    email: user.email,
-    age: user.age,
-    height: user.height,
-    weight: user.weight,
-    fitnessGoal: user.fitnessGoal,
-},
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                age: user.age,
+                height: user.height,
+                weight: user.weight,
+                fitnessGoal: user.fitnessGoal,
+            },
         });
     } catch (error) {
         res.status(500).json({
@@ -73,9 +73,13 @@ export const login = async (req, res) => {
     { expiresIn: "1d" }
 );
 
+res.cookie("token", token, {
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+});
+
 res.json({
     message: "Login successful",
-    token,
     user: {
         id: user._id,
         name: user.name,

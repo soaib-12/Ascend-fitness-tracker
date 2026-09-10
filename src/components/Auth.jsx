@@ -1,26 +1,26 @@
-import { useState } from 'react';
-import './Auth.css';
-import {
-  registerUser,
-  loginUser,
-  fetchCurrentUser,
-} from '../services/api';
+import { useState } from "react";
+import "./Auth.css";
+import { registerUser, loginUser, fetchCurrentUser } from "../services/api";
 
-export default function Auth({ initialMode = 'login', onBack, onAuthenticated }) {
-  const [isLoginView, setIsLoginView] = useState(initialMode !== 'signup');
+export default function Auth({
+  initialMode = "login",
+  onBack,
+  onAuthenticated,
+}) {
+  const [isLoginView, setIsLoginView] = useState(initialMode !== "signup");
 
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
   const [regData, setRegData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    age: '',
-    height: '',
-    weight: '',
-    goal: '',
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    age: "",
+    height: "",
+    weight: "",
+    goal: "",
   });
 
   const handleRegInput = (e) => {
@@ -34,14 +34,10 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
     e.preventDefault();
 
     try {
-      const response = await loginUser({
+      await loginUser({
         email: loginEmail,
         password: loginPassword,
       });
-
-      const { token } = response.data;
-
-      localStorage.setItem('token', token);
 
       const userResponse = await fetchCurrentUser();
 
@@ -49,7 +45,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
     } catch (error) {
       alert(
         error.response?.data?.message ||
-          'Login failed. Please check your email and password.'
+          "Login failed. Please check your email and password.",
       );
     }
   };
@@ -58,7 +54,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
     e.preventDefault();
 
     if (regData.password !== regData.confirmPassword) {
-      alert('Passwords do not match!');
+      alert("Passwords do not match!");
       return;
     }
 
@@ -77,11 +73,11 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
 
       setIsLoginView(true);
       setLoginEmail(regData.email);
-      setLoginPassword('');
+      setLoginPassword("");
     } catch (error) {
       alert(
         error.response?.data?.message ||
-          'Registration failed. Please try again.'
+          "Registration failed. Please try again.",
       );
     }
   };
@@ -101,12 +97,12 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
           className="auth-logo"
         />
 
-        <h2>{isLoginView ? 'Welcome back' : 'Set up your profile'}</h2>
+        <h2>{isLoginView ? "Welcome back" : "Set up your profile"}</h2>
 
         <p>
           {isLoginView
-            ? 'Continue your wellness journey.'
-            : 'Start your personalized fitness path today.'}
+            ? "Continue your wellness journey."
+            : "Start your personalized fitness path today."}
         </p>
       </div>
 
@@ -138,7 +134,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
             </button>
 
             <p className="toggle-text">
-              New to Ascend?{' '}
+              New to Ascend?{" "}
               <button
                 type="button"
                 onClick={() => setIsLoginView(false)}
@@ -246,12 +242,8 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
                 <option value="full_transformation">
                   Full Body Transformation
                 </option>
-                <option value="weight_loss">
-                  Weight Loss
-                </option>
-                <option value="mass_gain">
-                  Mass Gain
-                </option>
+                <option value="weight_loss">Weight Loss</option>
+                <option value="mass_gain">Mass Gain</option>
               </select>
             </div>
 
@@ -260,7 +252,7 @@ export default function Auth({ initialMode = 'login', onBack, onAuthenticated })
             </button>
 
             <p className="toggle-text">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <button
                 type="button"
                 onClick={() => setIsLoginView(true)}
