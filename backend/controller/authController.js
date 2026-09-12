@@ -1,127 +1,284 @@
-import bcrypt from "bcryptjs";
-import User from "../model/user.js";
-import jwt from "jsonwebtoken";
-export const signup = async (req, res) => {
-    try {
-        const { name, email, password, age, height, weight, fitnessGoal } = req.body;
-            const existingUser = await User.findOne({ email });
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const User = require("../model/user");
 
-                if (existingUser) {
-                    return res.status(400).json({
-                    message: "User already exists",
-                });
-            }
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+const ALLOWED_GOALS = [
+  "full_transformation",
+  "weight_loss",
+  "mass_gain",
+];
 
-        const user = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-            age,
-            height,
-            weight,
-            fitnessGoal,
-        });
+const signup = async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      age,
+      height,
+      weight,
+      fitnessGoal,
+    } = req.body;
 
-        res.status(201).json({
-            message: "User created successfully",
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                age: user.age,
-                height: user.height,
-                weight: user.weight,
-                fitnessGoal: user.fitnessGoal,
-            },
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Signup failed",
-            error: error.message,
-        });
+    // Validate name
+    if (
+      typeof name !== "string" ||
+      name.trim().length < 2 ||
+      name.trim().length > 50
+    ) {
+      return res.status(400).json({
+        message: "Name must be between 2 and 50 characters.",
+      });
     }
-};
 
-export const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+    // Validate email
+    if (
+      typeof email !== "string" ||
+      !EMAIL_REGEX.test(email.trim())
+    ) {
+      return res.status(400).json({
+        message: "Please provide a valid email address.",
+      });
+    }
 
-        const user = await User.findOne({ email });
+    // Validate password
+    if (
+      typeof password !== "string" ||
+      password.length < 8 ||
+      password.length > 128
+    ) {
+      return res.status(400).json({
+        message: "Password must be between 8 and 128 characters.",
+      });
+    }
 
-        if (!user) {
-            return res.status(400).json({
-                message: "Invalid email or password",
-            });
-        }
+    // Validate age
+    const parsedAge = Number(age);
 
-        const isPasswordCorrect = await bcrypt.compare(
-            password,
-            user.password
-        );
+    if (
+      !Number.isInteger(parsedAge) ||
+      parsedAge < 13 ||
+      parsedAge > 120
+    ) {
+      return res.status(400).json({
+        message: "Age must be between 13 and 120.",
+      });
+    }
 
-        if (!isPasswordCorrect) {
-            return res.status(400).json({
-                message: "Invalid email or password",
-            });
-        }
+    // Validate height
+    const parsedHeight = Number(height);
 
-        const token = jwt.sign(
-    { id: user._id },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-);
+    if (
+      !Number.isFinite(parsedHeight) ||
+      parsedHeight < 50 ||
+      parsedHeight > 250
+    ) {
+      return res.status(400).json({
+        message: "Height must be between 50 and 250 cm.",
+      });
+    }
 
-res.cookie("token", token, {
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
-});
+    // Validate weight
+    const parsedWeight = Number(weight);
 
-res.json({
-    message: "Login successful",
-    user: {
+    if (
+      !Number.isFinite(parsedWeight) ||
+      parsedWeight < 20 ||
+      parsedWeight > 500
+    ) {
+      return res.status(400).json({
+        message: "Weight must be between 20 and 500 kg.",
+      });
+    }
+
+    // Validate fitness goal
+    if (!ALLOWED_GOALS.includes(fitnessGoal)) {
+      return res.status(400).json({
+        message: "Invalid fitness goal.",
+      });
+    }
+
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check duplicate email
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        message: "An account with this email already exists.",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create user
+    const user = await User.create({
+      name: normalizedName,
+      email: normalizedEmail,
+      password: hashedPassword,
+      age: parsedAge,
+      height: parsedHeight,
+      weight: parsedWeight,
+      fitnessGoal,
+    });
+
+    return res.status(201).json({
+      message: "Account created successfully.",
+      user: {
         id: user._id,
         name: user.name,
         email: user.email,
-    },
-});
-    } catch (error) {
-        res.status(500).json({
-            message: "Login failed",
-            error: error.message,
-        });
-    }
+        age: user.age,
+        height: user.height,
+        weight: user.weight,
+        fitnessGoal: user.fitnessGoal,
+      },
+    });
+  } catch (error) {
+    console.error("Signup error:", error);
+
+    return res.status(500).json({
+      message: "Something went wrong while creating your account.",
+    });
+  }
 };
 
-export const getMe = async (req, res) => {
-    try {
-        const user = await User.findById(req.userId).select("-password");
 
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found",
-            });
-        }
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-        res.status(200).json({
-            message: "User profile fetched successfully",
-            user,
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Failed to fetch user profile",
-            error: error.message,
-        });
+    // Validate email
+    if (
+      typeof email !== "string" ||
+      !EMAIL_REGEX.test(email.trim())
+    ) {
+      return res.status(400).json({
+        message: "Please provide a valid email address.",
+      });
     }
-};
 
-export const logout = (req, res) => {
-    res.clearCookie("token", {
-        httpOnly: true,
+    // Validate password
+    if (
+      typeof password !== "string" ||
+      password.length === 0
+    ) {
+      return res.status(400).json({
+        message: "Password is required.",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Find user
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid email or password.",
+      });
+    }
+
+    // Compare passwords
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!passwordMatches) {
+      return res.status(401).json({
+        message: "Invalid email or password.",
+      });
+    }
+
+    // Create JWT
+    const token = jwt.sign(
+      {
+        id: user._id,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    // Store JWT in HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({
-        message: "Logout successful",
+      message: "Login successful.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        age: user.age,
+        height: user.height,
+        weight: user.weight,
+        fitnessGoal: user.fitnessGoal,
+      },
     });
+  } catch (error) {
+    console.error("Login error:", error);
+
+    return res.status(500).json({
+      message: "Something went wrong while logging in.",
+    });
+  }
+};
+
+
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    return res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+
+    return res.status(500).json({
+      message: "Something went wrong.",
+    });
+  }
+};
+
+
+const logout = async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  return res.status(200).json({
+    message: "Logged out successfully.",
+  });
+};
+
+
+module.exports = {
+  signup,
+  login,
+  getMe,
+  logout,
 };
