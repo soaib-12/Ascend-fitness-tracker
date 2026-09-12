@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import LandingPage from "./components/LandingPage";
 import Auth from "./components/Auth";
@@ -9,7 +8,6 @@ import QuickActions from "./QuickActions";
 import Activity from "./Activity";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
-
 
 import {
   initialStats,
@@ -30,6 +28,7 @@ import {
 } from "./Forms";
 
 import { fetchCurrentUser, logoutUser } from "./services/api";
+
 function App() {
   const [currentView, setCurrentView] = useState("landing");
   const [authMode, setAuthMode] = useState("login");
@@ -66,64 +65,94 @@ function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
 
-  // Check if the user is already logged in when the page is refreshed
+  // --- Browser History Synchronization ---
+  useEffect(() => {
+    // Replace initial state on mount
+    window.history.replaceState({ view: currentView, page: activePage }, "");
+
+    const handlePopState = (event) => {
+      if (event.state) {
+        if (event.state.view) setCurrentView(event.state.view);
+        if (event.state.page) setActivePage(event.state.page);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Update history when switching tabs inside the dashboard
+  function navigatePage(newPage) {
+    if (newPage === activePage) return;
+    setActivePage(newPage);
+    window.history.pushState(
+      { view: "dashboard", page: newPage },
+      "",
+      `#${newPage}`
+    );
+  }
+
+  // Back button callback for sub-pages (Settings, Profile, etc.)
+  function handleBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigatePage("dashboard");
+    }
+  }
+
+  // Check user authentication
   useEffect(() => {
     fetchCurrentUser()
       .then((response) => {
         setUser(response.data.user);
         setCurrentView("dashboard");
+        window.history.replaceState({ view: "dashboard", page: "dashboard" }, "");
       })
       .catch(() => {
         setUser(null);
         setCurrentView("landing");
+        window.history.replaceState({ view: "landing", page: "dashboard" }, "");
       });
   }, []);
 
   // Save dashboard data locally
   useEffect(() => {
-    if (stats) {
-      localStorage.setItem("ascend-stats", JSON.stringify(stats));
-    }
+    if (stats) localStorage.setItem("ascend-stats", JSON.stringify(stats));
   }, [stats]);
 
   useEffect(() => {
-    if (activities) {
-      localStorage.setItem(
-        "ascend-activities",
-        JSON.stringify(activities)
-      );
-    }
+    if (activities) localStorage.setItem("ascend-activities", JSON.stringify(activities));
   }, [activities]);
 
   useEffect(() => {
-    if (goals) {
-      localStorage.setItem("ascend-goals", JSON.stringify(goals));
-    }
+    if (goals) localStorage.setItem("ascend-goals", JSON.stringify(goals));
   }, [goals]);
 
   function handleNavigate(targetView, mode = "login") {
     setAuthMode(mode);
     setCurrentView(targetView);
+    window.history.pushState({ view: targetView, page: activePage }, "", `#${targetView}`);
   }
 
   function handleAuthenticated(userData) {
-    if (userData) {
-      setUser(userData);
-    }
-
+    if (userData) setUser(userData);
     setCurrentView("dashboard");
+    setActivePage("dashboard");
+    window.history.pushState({ view: "dashboard", page: "dashboard" }, "", "#dashboard");
   }
 
   async function handleLogout() {
-  try {
-    await logoutUser();
-  } catch (error) {
-    console.error("Logout failed:", error);
-  } finally {
-    setUser(null);
-    setCurrentView("landing");
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setUser(null);
+      setCurrentView("landing");
+      window.history.pushState({ view: "landing", page: "dashboard" }, "", "#landing");
+    }
   }
-}
 
   function handleUpdateUser(updatedFields) {
     setUser((prev) => ({ ...prev, ...updatedFields }));
@@ -143,9 +172,7 @@ function App() {
   function handleToggleActivity(id) {
     setActivities((prev) =>
       prev.map((activity) =>
-        activity.id === id
-          ? { ...activity, done: !activity.done }
-          : activity
+        activity.id === id ? { ...activity, done: !activity.done } : activity
       )
     );
   }
@@ -153,47 +180,27 @@ function App() {
   function handleAddWorkout(workoutName) {
     setActivities((prev) => [
       ...prev,
-      {
-        id: Date.now(),
-        name: workoutName,
-        icon: "💪",
-        done: false,
-      },
+      { id: Date.now(), name: workoutName, icon: "💪", done: false },
     ]);
-
     const workoutsStat = stats?.find((s) => s.id === "workouts");
-
-    if (workoutsStat) {
-      updateStat("workouts", workoutsStat.value + 1);
-    }
-
+    if (workoutsStat) updateStat("workouts", workoutsStat.value + 1);
     setActiveModal(null);
   }
 
   function handleLogWater(amountLiters) {
     const waterStat = stats?.find((s) => s.id === "water");
-
     if (waterStat) {
-      const newTotal =
-        Math.round((waterStat.value + amountLiters) * 100) / 100;
-
+      const newTotal = Math.round((waterStat.value + amountLiters) * 100) / 100;
       updateStat("water", newTotal);
     }
-
     setActiveModal(null);
   }
 
   function handleUpdateWeight(newWeight) {
     updateStat("weight", newWeight);
-
     setGoals((prev) =>
-      prev.map((g) =>
-        g.unit === "kg"
-          ? { ...g, current: newWeight }
-          : g
-      )
+      prev.map((g) => (g.unit === "kg" ? { ...g, current: newWeight } : g))
     );
-
     setActiveModal(null);
   }
 
@@ -203,52 +210,32 @@ function App() {
 
   function handleAddGoal(goalData) {
     const { title, current, target, unit } = goalData;
-
     const progress =
       target === current
         ? 100
-        : Math.min(
-            100,
-            Math.max(
-              0,
-              Math.round((current / target) * 100)
-            )
-          );
+        : Math.min(100, Math.max(0, Math.round((current / target) * 100)));
 
     setGoals((prev) => [
       ...prev,
-      {
-        id: Date.now(),
-        title,
-        current,
-        target,
-        unit,
-        progress,
-      },
+      { id: Date.now(), title, current, target, unit, progress },
     ]);
-
     setActiveModal(null);
   }
 
-  const weightStat = stats?.find(
-    (stat) => stat.id === "weight"
-  );
+  const weightStat = stats?.find((stat) => stat.id === "weight");
 
   if (currentView === "landing") {
-    return (
-      <LandingPage
-        onNavigate={(mode) =>
-          handleNavigate("auth", mode)
-        }
-      />
-    );
+    return <LandingPage onNavigate={(mode) => handleNavigate("auth", mode)} />;
   }
 
   if (currentView === "auth") {
     return (
       <Auth
         initialMode={authMode}
-        onBack={() => setCurrentView("landing")}
+        onBack={() => {
+          setCurrentView("landing");
+          window.history.pushState({ view: "landing", page: "dashboard" }, "", "#landing");
+        }}
         onAuthenticated={handleAuthenticated}
       />
     );
@@ -262,10 +249,8 @@ function App() {
           active: link.id === activePage,
         }))}
         activePage={activePage}
-        onNavClick={setActivePage}
-        onAddWorkoutClick={() =>
-          setActiveModal("workout")
-        }
+        onNavClick={navigatePage}
+        onAddWorkoutClick={() => setActiveModal("workout")}
         mobileOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
         onLogout={handleLogout}
@@ -274,111 +259,69 @@ function App() {
       <main className="main-content">
         <Header
           userName={user?.name || "User"}
-          date={
-            user?.date ||
-            new Date().toLocaleDateString()
-          }
+          date={user?.date || new Date().toLocaleDateString()}
           avatarUrl={user?.avatarUrl || ""}
-          onMenuClick={() =>
-            setMobileNavOpen(true)
-          }
+          onMenuClick={() => setMobileNavOpen(true)}
         />
 
         {activePage === "profile" ? (
-          <Profile user={user} />
+          <Profile user={user} onBack={handleBack} />
         ) : activePage === "settings" ? (
-          <Settings user={user} onUpdateUser={handleUpdateUser} />
+          <Settings user={user} onUpdateUser={handleUpdateUser} onBack={handleBack} />
         ) : (
           <>
             <Stats stats={stats || []} />
-
             <Activity
               weeklyData={initialWeeklyActivity}
               currentDay={currentDay}
               activities={activities || []}
               onToggleActivity={handleToggleActivity}
               goals={goals || []}
-              onAddGoalClick={() =>
-                setActiveModal("goal")
-              }
+              onAddGoalClick={() => setActiveModal("goal")}
             />
-
             <QuickActions
-              onLogWater={() =>
-                setActiveModal("water")
-              }
-              onUpdateWeight={() =>
-                setActiveModal("weight")
-              }
-              onCalculateBMI={() =>
-                setActiveModal("bmi")
-              }
-              onAddGoal={() =>
-                setActiveModal("goal")
-              }
+              onLogWater={() => setActiveModal("water")}
+              onUpdateWeight={() => setActiveModal("weight")}
+              onCalculateBMI={() => setActiveModal("bmi")}
+              onAddGoal={() => setActiveModal("goal")}
             />
           </>
         )}
       </main>
 
       {activeModal === "workout" && (
-        <Modal
-          title="Add Workout"
-          onClose={() => setActiveModal(null)}
-        >
-          <AddWorkoutForm
-            onAddWorkout={handleAddWorkout}
-          />
+        <Modal title="Add Workout" onClose={() => setActiveModal(null)}>
+          <AddWorkoutForm onAddWorkout={handleAddWorkout} />
         </Modal>
       )}
 
       {activeModal === "water" && (
-        <Modal
-          title="Log Water"
-          onClose={() => setActiveModal(null)}
-        >
-          <LogWaterForm
-            onLogWater={handleLogWater}
-          />
+        <Modal title="Log Water" onClose={() => setActiveModal(null)}>
+          <LogWaterForm onLogWater={handleLogWater} />
         </Modal>
       )}
 
       {activeModal === "weight" && (
-        <Modal
-          title="Update Weight"
-          onClose={() => setActiveModal(null)}
-        >
+        <Modal title="Update Weight" onClose={() => setActiveModal(null)}>
           <UpdateWeightForm
-            currentWeight={
-              weightStat?.value || 70
-            }
+            currentWeight={weightStat?.value || 70}
             onUpdateWeight={handleUpdateWeight}
           />
         </Modal>
       )}
 
       {activeModal === "bmi" && (
-        <Modal
-          title="Calculate BMI"
-          onClose={() => setActiveModal(null)}
-        >
+        <Modal title="Calculate BMI" onClose={() => setActiveModal(null)}>
           <BMICalculatorForm
-            defaultWeight={
-              weightStat?.value || 70
-            }
+            defaultWeight={weightStat?.value || 70}
             onCalculated={handleBMICalculated}
           />
         </Modal>
       )}
 
       {activeModal === "goal" && (
-        <Modal
-          title="Add Goal"
-          onClose={() => setActiveModal(null)}
-        >
-          <AddGoalForm
-            onAddGoal={handleAddGoal}
-          />
+        <Modal title="Add Goal" onClose={() => setActiveModal(null)}>
+          <AddGoalForm onAddGoal={handleAddGoal} />
         </Modal>
       )}
     </div>
@@ -386,4 +329,3 @@ function App() {
 }
 
 export default App;
-
