@@ -1,6 +1,6 @@
 import express from "express";
 import checkToken from "../middlewares/checkToken.js";
-import { signup, login , getMe} from "../controller/authController.js";
+import { signup, login , getMe, logout} from "../controller/authController.js";
 
 const router = express.Router();
 
@@ -19,4 +19,5 @@ router.get("/protected", checkToken, (req, res) => {
     });
 });
 router.get("/me", checkToken, getMe);
+router.post("/logout", logout);
 export default router;

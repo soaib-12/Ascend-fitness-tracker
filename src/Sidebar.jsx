@@ -9,7 +9,15 @@ const iconMap = {
   progress: "trend",
 };
 
-function Sidebar({ navLinks, activePage, onNavClick, onAddWorkoutClick, mobileOpen, onClose }) {
+function Sidebar({
+  navLinks,
+  activePage,
+  onNavClick,
+  onAddWorkoutClick,
+  mobileOpen,
+  onClose,
+  onLogout
+}) {
   return (
     <>
       <div className={`sidebar-overlay ${mobileOpen ? "sidebar-overlay-visible" : ""}`} onClick={onClose} />
@@ -78,7 +86,7 @@ function Sidebar({ navLinks, activePage, onNavClick, onAddWorkoutClick, mobileOp
     <span>Settings</span>
   </button>
 
-  <button className="nav-item">
+  <button className="nav-item" onClick={onLogout}>
     <Icon name="logout" size={20} />
     <span>Logout</span>
   </button>

@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js";
 import cookieParser from "cookie-parser";
 dotenv.config();
+import dns from 'dns';
+dns.setServers(['8.8.8.8', '1.1.1.1']); // Forces Node.js to use Google & Cloudflare DNS
 
 const app = express();
 app.use(cors({

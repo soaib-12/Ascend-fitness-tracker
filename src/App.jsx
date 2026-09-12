@@ -10,6 +10,7 @@ import Activity from "./Activity";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
 
+
 import {
   initialStats,
   weeklyActivity as initialWeeklyActivity,
@@ -28,8 +29,7 @@ import {
   AddGoalForm,
 } from "./Forms";
 
-import { fetchCurrentUser } from "./services/api";
-
+import { fetchCurrentUser, logoutUser } from "./services/api";
 function App() {
   const [currentView, setCurrentView] = useState("landing");
   const [authMode, setAuthMode] = useState("login");
@@ -113,6 +113,17 @@ function App() {
 
     setCurrentView("dashboard");
   }
+
+  async function handleLogout() {
+  try {
+    await logoutUser();
+  } catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
+    setUser(null);
+    setCurrentView("landing");
+  }
+}
 
   function handleUpdateUser(updatedFields) {
     setUser((prev) => ({ ...prev, ...updatedFields }));
@@ -257,6 +268,7 @@ function App() {
         }
         mobileOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
+        onLogout={handleLogout}
       />
 
       <main className="main-content">

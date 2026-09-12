@@ -20,4 +20,7 @@ export const loginUser = (credentials) =>
 export const fetchCurrentUser = () =>
   API.get("/auth/me");
 
+export const logoutUser = () =>
+  API.post("/auth/logout");
+
 export default API;
