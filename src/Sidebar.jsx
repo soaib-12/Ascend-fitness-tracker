@@ -74,7 +74,6 @@ function Sidebar({
     <span>Profile</span>
   </button>
 
-  {/* UPDATED: Added onClick handler and active class */}
   <button 
     className={`nav-item ${activePage === "settings" ? "nav-item-active" : ""}`}
     onClick={() => {

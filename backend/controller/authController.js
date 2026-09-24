@@ -1,6 +1,6 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const User = require("../model/user");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import User from "../model/user.js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -10,7 +10,7 @@ const ALLOWED_GOALS = [
   "mass_gain",
 ];
 
-const signup = async (req, res) => {
+export const signup = async (req, res) => {
   try {
     const {
       name,
@@ -149,8 +149,7 @@ const signup = async (req, res) => {
   }
 };
 
-
-const login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -239,8 +238,7 @@ const login = async (req, res) => {
   }
 };
 
-
-const getMe = async (req, res) => {
+export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-password");
 
@@ -262,8 +260,7 @@ const getMe = async (req, res) => {
   }
 };
 
-
-const logout = async (req, res) => {
+export const logout = async (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     sameSite: "lax",
@@ -273,12 +270,4 @@ const logout = async (req, res) => {
   return res.status(200).json({
     message: "Logged out successfully.",
   });
-};
-
-
-module.exports = {
-  signup,
-  login,
-  getMe,
-  logout,
 };
