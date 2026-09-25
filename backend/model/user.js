@@ -9,6 +9,7 @@ const goalSchema = new mongoose.Schema({
   unit: { type: String, required: true, trim: true, maxlength: 20 },
   direction: { type: String, enum: ["increase", "decrease"], required: true },
   progress: { type: Number, min: 0, max: 100, required: true },
+  completedAt: { type: Date, default: null },
   targetText: String,
   footerIcon: String,
   footerText: String,
@@ -21,6 +22,8 @@ const workoutSchema = new mongoose.Schema({
   durationMinutes: { type: Number, default: 0, min: 0 },
   done: { type: Boolean, default: false },
   completedAt: { type: Date, default: null },
+  completionDate: { type: String, default: "" },
+  completionHistory: { type: [String], default: [] },
 }, { timestamps: true });
 
 const userSchema = new mongoose.Schema(

@@ -66,15 +66,16 @@ function getWeeklyActivity(workouts) {
   }
 
   workouts.forEach((workout) => {
-    if (!workout.done || !workout.completedAt) return;
+    const completionDates = workout.completionHistory?.length
+      ? workout.completionHistory
+      : workout.done && workout.completedAt
+        ? [getLocalDate(new Date(workout.completedAt))]
+        : [];
 
-    const completedDate = new Date(workout.completedAt);
-    const completedDay = getLocalDate(completedDate);
-    const dayInWeek = week.find((day) => day.date === completedDay);
-
-    if (dayInWeek) {
-      dayInWeek.minutes += workout.durationMinutes || 0;
-    }
+    completionDates.forEach((completedDay) => {
+      const dayInWeek = week.find((day) => day.date === completedDay);
+      if (dayInWeek) dayInWeek.minutes += workout.durationMinutes || 0;
+    });
   });
 
   return week;
@@ -87,6 +88,7 @@ function App() {
 
   const [stats, setStats] = useState(initialStats);
   const [activities, setActivities] = useState([]);
+  const [todayDate, setTodayDate] = useState(() => getLocalDate());
 
   const [goals, setGoals] = useState([]);
 
@@ -97,6 +99,14 @@ function App() {
 
   // Valid pages inside the dashboard
   const DASHBOARD_PAGES = ["dashboard", "workouts", "health", "goals", "progress", "profile", "settings"];
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const date = getLocalDate();
+      setTodayDate((current) => current === date ? current : date);
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   // --- Browser History Synchronization ---
   useEffect(() => {
@@ -234,7 +244,7 @@ function App() {
     if (!user?._id && !user?.id) return;
 
     let cancelled = false;
-    fetchWorkouts()
+    fetchWorkouts(todayDate)
       .then(({ data }) => {
         if (cancelled) return;
 
@@ -247,7 +257,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [user?._id, user?.id]);
+  }, [user?._id, user?.id, todayDate]);
 
   function handleNavigate(targetView, mode = "login") {
     setAuthMode(mode);
@@ -312,7 +322,7 @@ function App() {
 
   async function handleToggleActivity(id) {
     try {
-      const { data } = await toggleWorkout(id);
+      const { data } = await toggleWorkout(id, todayDate);
       setActivities((prev) =>
         prev.map((item) => item._id === id ? data.workout : item)
       );

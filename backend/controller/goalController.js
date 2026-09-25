@@ -82,6 +82,9 @@ export const createGoal = async (req, res) => {
       type: isWeightGoal ? "weight" : isCalorieGoal ? "calories" : "goal",
       icon: isWeightGoal ? "scale" : isCalorieGoal ? "flame" : "flag",
       progress: calculateProgress(Number(current), start, Number(target), direction),
+      completedAt: calculateProgress(Number(current), start, Number(target), direction) >= 100
+        ? new Date()
+        : null,
     };
 
     // Store the new goal inside the logged-in user's record.
@@ -144,7 +147,14 @@ export const updateGoal = async (req, res) => {
     goal.type = isWeightGoal ? "weight" : isCalorieGoal ? "calories" : "goal";
     goal.icon = isWeightGoal ? "scale" : isCalorieGoal ? "flame" : "flag";
     goal.direction = direction;
-    goal.progress = calculateProgress(current, start, target, direction);
+    // Completion is permanent: later profile weight updates must not reactivate it.
+    const wasCompleted = Boolean(goal.completedAt) || goal.progress >= 100;
+    goal.progress = wasCompleted
+      ? 100
+      : calculateProgress(current, start, target, direction);
+    if (goal.progress >= 100 && !goal.completedAt) {
+      goal.completedAt = new Date();
+    }
 
     await user.save();
     return res.status(200).json({ goal });

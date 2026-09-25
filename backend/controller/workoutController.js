@@ -29,6 +29,16 @@ function getWorkoutTotals(workouts) {
   return { totalCalories, completedCount };
 }
 
+function isValidDateKey(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+function getDateKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 export const listWorkouts = async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("workouts");
@@ -37,10 +47,17 @@ export const listWorkouts = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
+    const requestedDate = req.query.date;
+    const today = isValidDateKey(requestedDate) ? requestedDate : getDateKey();
+    const workouts = user.workouts.map((workout) => {
+      const completionDate = workout.completionDate ||
+        (workout.done && workout.completedAt ? getDateKey(new Date(workout.completedAt)) : "");
+      return { ...workout.toObject(), done: completionDate === today };
+    });
     const totals = getWorkoutTotals(user.workouts);
 
     return res.status(200).json({
-      workouts: user.workouts,
+      workouts,
       totalCalories: totals.totalCalories,
       completedCount: totals.completedCount,
     });
@@ -79,6 +96,7 @@ export const createWorkout = async (req, res) => {
       calories: calorieValue,
       durationMinutes: durationValue,
       done: false,
+      completionDate: "",
     });
     await user.save();
 
@@ -93,6 +111,10 @@ export const createWorkout = async (req, res) => {
 
 export const toggleWorkout = async (req, res) => {
   try {
+    const completionDate = req.body.date;
+    if (!isValidDateKey(completionDate)) {
+      return res.status(400).json({ message: "Enter a valid completion date." });
+    }
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ message: "Invalid workout id." });
     }
@@ -109,7 +131,18 @@ export const toggleWorkout = async (req, res) => {
       return res.status(404).json({ message: "Workout not found." });
     }
 
-    workout.done = !workout.done;
+    const isDoneToday = workout.completionDate === completionDate ||
+      (!workout.completionDate && workout.done && workout.completedAt &&
+        getDateKey(new Date(workout.completedAt)) === completionDate);
+    workout.done = !isDoneToday;
+    workout.completionDate = workout.done ? completionDate : "";
+    const history = new Set(workout.completionHistory || []);
+    if (history.size === 0 && workout.done && workout.completedAt) {
+      history.add(getDateKey(new Date(workout.completedAt)));
+    }
+    if (workout.done) history.add(completionDate);
+    else history.delete(completionDate);
+    workout.completionHistory = [...history].sort();
     workout.completedAt = workout.done ? new Date() : null;
     const calorieChange = workout.done ? workout.calories : -workout.calories;
 

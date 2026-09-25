@@ -36,8 +36,8 @@ export const createGoal = (goal) => API.post("/goals", goal);
 export const updateGoal = (id, goal) => API.put(`/goals/${id}`, goal);
 export const deleteGoal = (id) => API.delete(`/goals/${id}`);
 
-export const fetchWorkouts = () => API.get("/workouts");
+export const fetchWorkouts = (date) => API.get("/workouts", { params: { date } });
 export const createWorkout = (workout) => API.post("/workouts", workout);
-export const toggleWorkout = (id) => API.patch(`/workouts/${id}/toggle`);
+export const toggleWorkout = (id, date) => API.patch(`/workouts/${id}/toggle`, { date });
 
 export default API;
