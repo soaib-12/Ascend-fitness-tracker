@@ -97,6 +97,21 @@ const paths = {
       <path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2" />
     </>
   ),
+  calendar: (
+    <>
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </>
+  ),
+  history: (
+    <>
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+      <path d="M12 7v5l4 2" />
+    </>
+  ),
 };
 
 function Icon({ name, size = 20, strokeWidth = 1.8, className = "" }) {

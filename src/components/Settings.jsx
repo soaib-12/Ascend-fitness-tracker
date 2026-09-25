@@ -7,7 +7,7 @@ export default function Settings({ user, onUpdateUser, onBack }) {
     name: user?.name || 'User',
     email: user?.email || 'user@example.com',
     height: user?.height || '175',
-    weight: user?.weight || '70',
+    weight: user?.weight ?? '',
     goal: user?.goal || 'full_transformation',
     notifications: true,
   });
@@ -91,21 +91,23 @@ if (!profile.email.trim()) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validate()) {
       return;
     }
 
-    if (onUpdateUser) {
-      onUpdateUser({
+    try {
+      await onUpdateUser?.({
         ...profile,
         height: Number(profile.height),
         weight: Number(profile.weight),
       });
+      alert("Weight updated successfully!");
+    } catch (error) {
+      alert(error.response?.data?.message || "Could not save settings. Please try again.");
     }
-    alert('Settings saved successfully!');
   };
 
   return (

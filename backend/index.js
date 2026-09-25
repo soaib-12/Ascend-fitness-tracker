@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js";
+import goalRoutes from "./routes/goals.js";
+import workoutRoutes from "./routes/workouts.js";
 import cookieParser from "cookie-parser";
 dotenv.config();
 import dns from 'dns';
@@ -16,6 +18,8 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api/auth", authRoutes);
+app.use("/api/goals", goalRoutes);
+app.use("/api/workouts", workoutRoutes);
 app.get("/", (req, res) => {
     res.send("Ascend backend is running!");
 });

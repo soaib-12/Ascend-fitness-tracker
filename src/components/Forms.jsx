@@ -24,13 +24,33 @@ function Modal({ title, onClose, children }) {
 
 function AddWorkoutForm({ onAddWorkout }) {
   const [workoutName, setWorkoutName] = useState("");
+  const [calories, setCalories] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState("");
 
-  
   function handleSubmit(e) {
-    e.preventDefault(); // stop the page from reloading
-    if (workoutName.trim() === "") return; // ignore empty input
-    onAddWorkout(workoutName.trim());
-    setWorkoutName(""); // reset the field for next time
+    e.preventDefault();
+    const calorieValue = Number(calories);
+    const durationValue = Number(durationMinutes);
+
+    if (
+      !workoutName.trim() ||
+      calories === "" ||
+      !Number.isFinite(calorieValue) ||
+      calorieValue < 0 ||
+      !Number.isFinite(durationValue) ||
+      durationValue <= 0
+    ) {
+      return;
+    }
+
+    onAddWorkout({
+      name: workoutName.trim(),
+      calories: calorieValue,
+      durationMinutes: durationValue,
+    });
+    setWorkoutName("");
+    setCalories("");
+    setDurationMinutes("");
   }
 
   return (
@@ -40,8 +60,29 @@ function AddWorkoutForm({ onAddWorkout }) {
         id="workout-name"
         type="text"
         placeholder="e.g. Evening Cycling"
+        required
         value={workoutName}
         onChange={(e) => setWorkoutName(e.target.value)}
+      />
+      <label htmlFor="workout-calories">Calories burned</label>
+      <input
+        id="workout-calories"
+        type="number"
+        min="0"
+        step="any"
+        required
+        value={calories}
+        onChange={(e) => setCalories(e.target.value)}
+      />
+      <label htmlFor="workout-duration">Duration (minutes)</label>
+      <input
+        id="workout-duration"
+        type="number"
+        min="1"
+        step="1"
+        required
+        value={durationMinutes}
+        onChange={(e) => setDurationMinutes(e.target.value)}
       />
       <button type="submit" className="modal-submit-btn">
         Add Workout
@@ -137,9 +178,9 @@ function UpdateWeightForm({ currentWeight, onUpdateWeight }) {
 //
 // Formula: BMI = weight(kg) / (height(m))^2
 // ==============================================================
-function BMICalculatorForm({ defaultWeight, onCalculated }) {
+function BMICalculatorForm({ defaultWeight, defaultHeight = 170, onCalculated }) {
   const [weight, setWeight] = useState(defaultWeight);
-  const [heightCm, setHeightCm] = useState(170);
+  const [heightCm, setHeightCm] = useState(defaultHeight);
   const [result, setResult] = useState(null);
 
   function handleSubmit(e) {
@@ -192,21 +233,27 @@ function BMICalculatorForm({ defaultWeight, onCalculated }) {
 //   - onAddGoal: function(goalData) => void, where goalData is
 //     { title, current, target, unit }
 // ==============================================================
-function AddGoalForm({ onAddGoal }) {
-  const [title, setTitle] = useState("");
-  const [current, setCurrent] = useState("");
-  const [target, setTarget] = useState("");
-  const [unit, setUnit] = useState("kg");
+function AddGoalForm({ onAddGoal, initialGoal }) {
+  const [title, setTitle] = useState(initialGoal?.title || "");
+  const [current, setCurrent] = useState(initialGoal ? String(initialGoal.current) : "");
+  const [target, setTarget] = useState(initialGoal ? String(initialGoal.target) : "");
+  const [unit, setUnit] = useState(initialGoal?.unit || "kg");
+  const [direction, setDirection] = useState(initialGoal?.direction || "increase");
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (title.trim() === "" || current === "" || target === "") return;
+    const currentValue = Number(current);
+    const targetValue = Number(target);
+    if (title.trim() === "" || current === "" || target === "" || !unit.trim() ||
+        !Number.isFinite(currentValue) || !Number.isFinite(targetValue) || currentValue === targetValue) return;
 
     onAddGoal({
       title: title.trim(),
-      current: parseFloat(current),
-      target: parseFloat(target),
-      unit,
+      current: currentValue,
+      target: targetValue,
+      unit: unit.trim(),
+      direction,
+      type: initialGoal?.type || (unit.trim().toLowerCase() === "kg" ? "weight" : "goal"),
     });
   }
 
@@ -216,6 +263,8 @@ function AddGoalForm({ onAddGoal }) {
       <input
         id="goal-title"
         type="text"
+        required
+        maxLength={100}
         placeholder="e.g. Reach 60 kg"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -225,6 +274,8 @@ function AddGoalForm({ onAddGoal }) {
       <input
         id="goal-current"
         type="number"
+        step="any"
+        required
         value={current}
         onChange={(e) => setCurrent(e.target.value)}
       />
@@ -233,6 +284,8 @@ function AddGoalForm({ onAddGoal }) {
       <input
         id="goal-target"
         type="number"
+        step="any"
+        required
         value={target}
         onChange={(e) => setTarget(e.target.value)}
       />
@@ -241,12 +294,20 @@ function AddGoalForm({ onAddGoal }) {
       <input
         id="goal-unit"
         type="text"
+        required
+        maxLength={20}
         value={unit}
         onChange={(e) => setUnit(e.target.value)}
       />
 
+      <label htmlFor="goal-direction">Progress direction</label>
+      <select id="goal-direction" value={direction} onChange={(e) => setDirection(e.target.value)}>
+        <option value="increase">Increase toward target</option>
+        <option value="decrease">Decrease toward target</option>
+      </select>
+
       <button type="submit" className="modal-submit-btn">
-        Add Goal
+        {initialGoal ? "Save Changes" : "Add Goal"}
       </button>
     </form>
   );

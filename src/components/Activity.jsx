@@ -65,16 +65,19 @@ function TodaysActivity({ activities, onToggleActivity }) {
       </div>
 
       <div className="activity-list">
+        {activities.length === 0 && <p>No workouts yet. Add a workout to get started.</p>}
         {activities.map((activity) => (
           <button
-            key={activity.id}
+            key={activity.id || activity._id}
             className={`activity-item ${activity.done ? "activity-item-done" : ""}`}
-            onClick={() => onToggleActivity(activity.id)}
+            onClick={() => onToggleActivity(activity.id || activity._id)}
           >
             <span className={`activity-icon ${activity.done ? "activity-icon-done" : ""}`}>
               <Icon name={iconFor(activity)} size={17} />
             </span>
-            <span className="activity-name">{activity.name}</span>
+            <span className="activity-name">
+              {activity.name}{activity.calories ? ` · ${activity.calories} kcal` : ""}
+            </span>
             <span className={`activity-check ${activity.done ? "activity-check-done" : ""}`}>
               {activity.done && <Icon name="check" size={12} strokeWidth={2.6} />}
             </span>
@@ -96,7 +99,7 @@ function ActiveGoals({ goals, onAddGoalClick }) {
       </div>
 
       <div className="goals-list">
-        {goals.map((goal) => (
+        {goals.filter((goal) => goal.progress < 100).map((goal) => (
           <div className="goal-item" key={goal.id}>
             <div className="goal-item-top">
               <div>

@@ -30,9 +30,6 @@ function SignupForm({ onSignupSuccess }) {
       // Send all form fields to backend
       const response = await registerUser(formData);
 
-      // Save returned auth token and user profile details locally
-      localStorage.setItem("token", response.data.token);
-
       if (onSignupSuccess) {
         onSignupSuccess(response.data.user);
       }

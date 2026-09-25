@@ -260,6 +260,97 @@ export const getMe = async (req, res) => {
   }
 };
 
+export const updateWeight = async (req, res) => {
+  try {
+    const weight = Number(req.body.weight);
+
+    if (!Number.isFinite(weight) || weight < 20 || weight > 500) {
+      return res.status(400).json({
+        message: "Weight must be between 20 and 500 kg.",
+      });
+    }
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    user.weight = weight;
+    await user.save();
+
+    return res.status(200).json({ weight: user.weight });
+  } catch (error) {
+    console.error("Update weight error:", error);
+    return res.status(500).json({ message: "Could not update weight." });
+  }
+};
+
+export const logWater = async (req, res) => {
+  try {
+    const amount = Number(req.body.amount);
+    const date = req.body.date;
+    const parsedDate = new Date(`${date}T00:00:00.000Z`);
+
+    if (
+      !Number.isFinite(amount) ||
+      amount <= 0 ||
+      typeof date !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      Number.isNaN(parsedDate.getTime()) ||
+      parsedDate.toISOString().slice(0, 10) !== date
+    ) {
+      return res.status(400).json({ message: "Enter a valid water amount and date." });
+    }
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.waterDate !== date) {
+      user.waterIntake = 0;
+      user.waterDate = date;
+    }
+
+    user.waterIntake = Math.round((user.waterIntake + amount) * 100) / 100;
+    await user.save();
+
+    return res.status(200).json({
+      waterIntake: user.waterIntake,
+      waterDate: user.waterDate,
+    });
+  } catch (error) {
+    console.error("Log water error:", error);
+    return res.status(500).json({ message: "Could not save water intake." });
+  }
+};
+
+export const updateBmi = async (req, res) => {
+  try {
+    const bmi = Number(req.body.bmi);
+
+    if (!Number.isFinite(bmi) || bmi <= 0 || bmi > 100) {
+      return res.status(400).json({ message: "Enter a valid BMI value." });
+    }
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    user.bmi = Math.round(bmi * 10) / 10;
+    await user.save();
+
+    return res.status(200).json({ bmi: user.bmi });
+  } catch (error) {
+    console.error("Update BMI error:", error);
+    return res.status(500).json({ message: "Could not save BMI." });
+  }
+};
+
 export const logout = async (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,

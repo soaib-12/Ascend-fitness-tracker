@@ -1,5 +1,28 @@
 import mongoose from "mongoose";
 
+const goalSchema = new mongoose.Schema({
+  type: { type: String, default: "goal", trim: true },
+  title: { type: String, required: true, trim: true, maxlength: 100 },
+  current: { type: Number, required: true },
+  start: { type: Number, required: true },
+  target: { type: Number, required: true },
+  unit: { type: String, required: true, trim: true, maxlength: 20 },
+  direction: { type: String, enum: ["increase", "decrease"], required: true },
+  progress: { type: Number, min: 0, max: 100, required: true },
+  targetText: String,
+  footerIcon: String,
+  footerText: String,
+  icon: String,
+}, { timestamps: true });
+
+const workoutSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true, maxlength: 100 },
+  calories: { type: Number, required: true, min: 0 },
+  durationMinutes: { type: Number, default: 0, min: 0 },
+  done: { type: Boolean, default: false },
+  completedAt: { type: Date, default: null },
+}, { timestamps: true });
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -51,6 +74,23 @@ const userSchema = new mongoose.Schema(
       max: 500,
     },
 
+    waterIntake: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    waterDate: {
+      type: String,
+      default: "",
+    },
+
+    bmi: {
+      type: Number,
+      min: 0,
+      max: 100,
+    },
+
     fitnessGoal: {
       type: String,
       required: true,
@@ -60,6 +100,8 @@ const userSchema = new mongoose.Schema(
         "mass_gain",
       ],
     },
+    goals: { type: [goalSchema], default: [] },
+    workouts: { type: [workoutSchema], default: [] },
   },
   {
     timestamps: true,
