@@ -172,3 +172,96 @@ export const toggleWorkout = async (req, res) => {
     return res.status(500).json({ message: "Could not update workout." });
   }
 };
+
+export const updateWorkout = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid workout id." });
+    }
+
+    const { name, calories, durationMinutes } = req.body;
+    const calorieValue = Number(calories);
+    const durationValue = Number(durationMinutes);
+    if (
+      typeof name !== "string" || !name.trim() || name.trim().length > 100 ||
+      !Number.isFinite(calorieValue) || calorieValue < 0 ||
+      !Number.isFinite(durationValue) || durationValue <= 0
+    ) {
+      return res.status(400).json({ message: "Enter a workout name, calories, and a valid duration." });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    const workout = user.workouts.id(req.params.id);
+    if (!workout) return res.status(404).json({ message: "Workout not found." });
+
+    const calorieDifference = calorieValue - workout.calories;
+    workout.name = name.trim();
+    workout.calories = calorieValue;
+    workout.durationMinutes = durationValue;
+
+    if (workout.done && calorieDifference !== 0) {
+      user.goals.forEach((goal) => {
+        const unit = (goal.unit || "").toLowerCase();
+        const isCalorieGoal = goal.type === "calories" || ["kcal", "cal", "calories"].includes(unit);
+        if (!isCalorieGoal) return;
+        goal.current = Math.max(0, goal.current + calorieDifference);
+        updateCalorieGoalProgress(goal);
+      });
+    }
+
+    await user.save();
+    const totals = getWorkoutTotals(user.workouts);
+    return res.status(200).json({
+      workout,
+      goals: user.goals,
+      totalCalories: totals.totalCalories,
+      completedCount: totals.completedCount,
+    });
+  } catch (error) {
+    console.error("Update workout error:", error);
+    return res.status(500).json({ message: "Could not update workout." });
+  }
+};
+
+export const deleteWorkout = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid workout id." });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const workout = user.workouts.id(req.params.id);
+    if (!workout) {
+      return res.status(404).json({ message: "Workout not found." });
+    }
+
+    if (workout.done) {
+      user.goals.forEach((goal) => {
+        const unit = (goal.unit || "").toLowerCase();
+        const isCalorieGoal = goal.type === "calories" || ["kcal", "cal", "calories"].includes(unit);
+        if (!isCalorieGoal) return;
+        goal.current = Math.max(0, goal.current - workout.calories);
+        updateCalorieGoalProgress(goal);
+      });
+    }
+
+    workout.deleteOne();
+    await user.save();
+
+    const totals = getWorkoutTotals(user.workouts);
+    return res.status(200).json({
+      message: "Workout deleted.",
+      totalCalories: totals.totalCalories,
+      completedCount: totals.completedCount,
+    });
+  } catch (error) {
+    console.error("Delete workout error:", error);
+    return res.status(500).json({ message: "Could not delete workout." });
+  }
+};

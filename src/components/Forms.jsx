@@ -22,10 +22,10 @@ function Modal({ title, onClose, children }) {
 }
 
 
-function AddWorkoutForm({ onAddWorkout }) {
-  const [workoutName, setWorkoutName] = useState("");
-  const [calories, setCalories] = useState("");
-  const [durationMinutes, setDurationMinutes] = useState("");
+function AddWorkoutForm({ onAddWorkout, onUpdateWorkout, initialWorkout }) {
+  const [workoutName, setWorkoutName] = useState(initialWorkout?.name || "");
+  const [calories, setCalories] = useState(initialWorkout ? String(initialWorkout.calories) : "");
+  const [durationMinutes, setDurationMinutes] = useState(initialWorkout ? String(initialWorkout.durationMinutes) : "");
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -43,11 +43,13 @@ function AddWorkoutForm({ onAddWorkout }) {
       return;
     }
 
-    onAddWorkout({
+    const workoutData = {
       name: workoutName.trim(),
       calories: calorieValue,
       durationMinutes: durationValue,
-    });
+    };
+    if (initialWorkout) onUpdateWorkout(initialWorkout.id || initialWorkout._id, workoutData);
+    else onAddWorkout(workoutData);
     setWorkoutName("");
     setCalories("");
     setDurationMinutes("");
@@ -85,7 +87,7 @@ function AddWorkoutForm({ onAddWorkout }) {
         onChange={(e) => setDurationMinutes(e.target.value)}
       />
       <button type="submit" className="modal-submit-btn">
-        Add Workout
+        {initialWorkout ? "Save Workout" : "Add Workout"}
       </button>
     </form>
   );

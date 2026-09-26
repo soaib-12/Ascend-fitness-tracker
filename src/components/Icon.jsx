@@ -112,6 +112,12 @@ const paths = {
       <path d="M12 7v5l4 2" />
     </>
   ),
+  trash: (
+    <>
+      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
+    </>
+  ),
+  edit: <path d="m16 4 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4Z" />,
 };
 
 function Icon({ name, size = 20, strokeWidth = 1.8, className = "" }) {

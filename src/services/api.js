@@ -26,6 +26,8 @@ export const logWaterIntake = (amount, date) =>
 
 export const updateUserBmi = (bmi) =>
   API.patch("/auth/me/bmi", { bmi });
+export const clearWaterIntake = (date) => API.delete("/auth/me/water", { data: { date } });
+export const clearUserBmi = () => API.delete("/auth/me/bmi");
 
 export const logoutUser = () =>
   API.post("/auth/logout");
@@ -38,6 +40,8 @@ export const deleteGoal = (id) => API.delete(`/goals/${id}`);
 
 export const fetchWorkouts = (date) => API.get("/workouts", { params: { date } });
 export const createWorkout = (workout) => API.post("/workouts", workout);
+export const updateWorkout = (id, workout) => API.put(`/workouts/${id}`, workout);
 export const toggleWorkout = (id, date) => API.patch(`/workouts/${id}/toggle`, { date });
+export const deleteWorkout = (id) => API.delete(`/workouts/${id}`);
 
 export default API;

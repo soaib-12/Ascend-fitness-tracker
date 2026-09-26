@@ -327,6 +327,33 @@ export const logWater = async (req, res) => {
   }
 };
 
+export const clearWater = async (req, res) => {
+  try {
+    const date = req.body.date;
+    const parsedDate = new Date(`${date}T00:00:00.000Z`);
+    if (
+      typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date
+    ) {
+      return res.status(400).json({ message: "Enter a valid date." });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    user.waterIntake = 0;
+    user.waterDate = date;
+    await user.save();
+
+    return res.status(200).json({ waterIntake: user.waterIntake, waterDate: user.waterDate });
+  } catch (error) {
+    console.error("Clear water error:", error);
+    return res.status(500).json({ message: "Could not clear water intake." });
+  }
+};
+
 export const updateBmi = async (req, res) => {
   try {
     const bmi = Number(req.body.bmi);
@@ -348,6 +375,22 @@ export const updateBmi = async (req, res) => {
   } catch (error) {
     console.error("Update BMI error:", error);
     return res.status(500).json({ message: "Could not save BMI." });
+  }
+};
+
+export const clearBmi = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    user.bmi = undefined;
+    await user.save();
+    return res.status(200).json({ message: "BMI cleared." });
+  } catch (error) {
+    console.error("Clear BMI error:", error);
+    return res.status(500).json({ message: "Could not clear BMI." });
   }
 };
 

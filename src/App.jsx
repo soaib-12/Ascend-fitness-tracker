@@ -9,6 +9,8 @@ import Activity from "./components/Activity";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
 import Goals from "./components/Goals";
+import Workouts from "./components/Workouts";
+import Health from "./components/Health";
 
 import {
   initialStats,
@@ -36,7 +38,11 @@ import {
   updateUserBmi,
   fetchWorkouts,
   createWorkout,
+  updateWorkout,
   toggleWorkout,
+  deleteWorkout,
+  clearWaterIntake,
+  clearUserBmi,
 } from "./services/api";
 
 function getLocalDate(date = new Date()) {
@@ -44,6 +50,12 @@ function getLocalDate(date = new Date()) {
   const month = String(today.getMonth() + 1).padStart(2, "0");
   const day = String(today.getDate()).padStart(2, "0");
   return `${today.getFullYear()}-${month}-${day}`;
+}
+
+function getWorkoutRequestError(error, fallback) {
+  if (error.response?.data?.message) return error.response.data.message;
+  if (!error.response) return "Cannot reach the backend. Start or restart the backend server, then try again.";
+  return fallback;
 }
 
 function getWeeklyActivity(workouts) {
@@ -96,6 +108,7 @@ function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [editingGoal, setEditingGoal] = useState(null);
+  const [editingWorkout, setEditingWorkout] = useState(null);
 
   // Valid pages inside the dashboard
   const DASHBOARD_PAGES = ["dashboard", "workouts", "health", "goals", "progress", "profile", "settings"];
@@ -344,6 +357,32 @@ function App() {
     }
   }
 
+  async function handleDeleteWorkout(id) {
+    if (!window.confirm("Delete this workout? This cannot be undone.")) return;
+    try {
+      const { data } = await deleteWorkout(id);
+      setActivities((prev) => prev.filter((item) => item._id !== id && item.id !== id));
+      updateStat("calories", data.totalCalories);
+      updateStat("workouts", data.completedCount);
+    } catch (error) {
+      alert(getWorkoutRequestError(error, "Could not delete workout. Please try again."));
+    }
+  }
+
+  async function handleUpdateWorkout(id, workoutData) {
+    try {
+      const { data } = await updateWorkout(id, workoutData);
+      setActivities((prev) => prev.map((item) => (item._id || item.id) === id ? data.workout : item));
+      setGoals(data.goals);
+      updateStat("calories", data.totalCalories);
+      updateStat("workouts", data.completedCount);
+      setActiveModal(null);
+      setEditingWorkout(null);
+    } catch (error) {
+      alert(getWorkoutRequestError(error, "Could not update workout. Please try again."));
+    }
+  }
+
   async function handleLogWater(amountLiters) {
     try {
       const { data } = await logWaterIntake(amountLiters, getLocalDate());
@@ -369,6 +408,24 @@ function App() {
       setUser((prev) => ({ ...prev, bmi: data.bmi }));
     } catch (error) {
       alert(error.response?.data?.message || "Could not save BMI. Please try again.");
+    }
+  }
+
+  async function handleClearWater() {
+    try {
+      const { data } = await clearWaterIntake(getLocalDate());
+      setUser((prev) => ({ ...prev, ...data }));
+    } catch (error) {
+      alert(error.response?.data?.message || "Could not clear water intake. Please try again.");
+    }
+  }
+
+  async function handleClearBmi() {
+    try {
+      await clearUserBmi();
+      setUser((prev) => ({ ...prev, bmi: null }));
+    } catch (error) {
+      alert(error.response?.data?.message || "Could not clear BMI. Please try again.");
     }
   }
 
@@ -434,7 +491,7 @@ function App() {
         }))}
         activePage={activePage}
         onNavClick={navigatePage}
-        onAddWorkoutClick={() => setActiveModal("workout")}
+        onAddWorkoutClick={() => { setEditingWorkout(null); setActiveModal("workout"); }}
         mobileOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
         onLogout={handleLogout}
@@ -459,6 +516,25 @@ function App() {
             onEditGoal={(goal) => { setEditingGoal(goal); setActiveModal("goal"); }}
             onDeleteGoal={handleDeleteGoal}
           />
+        ) : activePage === "workouts" ? (
+          <Workouts
+            activities={activities}
+            weeklyData={getWeeklyActivity(activities)}
+            onToggleActivity={handleToggleActivity}
+            onDeleteWorkout={handleDeleteWorkout}
+            onEditWorkout={(workout) => { setEditingWorkout(workout); setActiveModal("workout"); }}
+            onAddWorkout={() => { setEditingWorkout(null); setActiveModal("workout"); }}
+          />
+        ) : activePage === "health" ? (
+          <Health
+            stats={stats}
+            user={user}
+            onLogWater={() => setActiveModal("water")}
+            onUpdateWeight={() => setActiveModal("weight")}
+            onCalculateBMI={() => setActiveModal("bmi")}
+            onClearWater={handleClearWater}
+            onClearBMI={handleClearBmi}
+          />
         ) : (
           <>
             <Stats stats={stats || []} />
@@ -481,8 +557,13 @@ function App() {
       </main>
 
       {activeModal === "workout" && (
-        <Modal title="Add Workout" onClose={() => setActiveModal(null)}>
-          <AddWorkoutForm onAddWorkout={handleAddWorkout} />
+        <Modal title={editingWorkout ? "Edit Workout" : "Add Workout"} onClose={() => { setActiveModal(null); setEditingWorkout(null); }}>
+          <AddWorkoutForm
+            key={editingWorkout?._id || editingWorkout?.id || "new-workout"}
+            initialWorkout={editingWorkout}
+            onAddWorkout={handleAddWorkout}
+            onUpdateWorkout={handleUpdateWorkout}
+          />
         </Modal>
       )}
 

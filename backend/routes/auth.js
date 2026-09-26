@@ -6,7 +6,9 @@ import {
   getMe,
   updateWeight,
   logWater,
+  clearWater,
   updateBmi,
+  clearBmi,
   logout,
 } from "../controller/authController.js";
 
@@ -29,6 +31,8 @@ router.get("/protected", checkToken, (req, res) => {
 router.get("/me", checkToken, getMe);
 router.patch("/me/weight", checkToken, updateWeight);
 router.patch("/me/water", checkToken, logWater);
+router.delete("/me/water", checkToken, clearWater);
 router.patch("/me/bmi", checkToken, updateBmi);
+router.delete("/me/bmi", checkToken, clearBmi);
 router.post("/logout", logout);
 export default router;
