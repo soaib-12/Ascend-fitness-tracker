@@ -93,16 +93,6 @@ function AddWorkoutForm({ onAddWorkout, onUpdateWorkout, initialWorkout }) {
   );
 }
 
-// ==============================================================
-// LogWaterForm Component
-// --------------------------------------------------------------
-// Props:
-//   - onLogWater: function(amountInLiters) => void
-// State:
-//   - amount: string, the number typed by the user (kept as a
-//     string because that's what <input> gives us; converted to
-//     a number only when we submit)
-// ==============================================================
 function LogWaterForm({ onLogWater }) {
   const [amount, setAmount] = useState("0.25");
 
@@ -131,13 +121,6 @@ function LogWaterForm({ onLogWater }) {
   );
 }
 
-// ==============================================================
-// UpdateWeightForm Component
-// --------------------------------------------------------------
-// Props:
-//   - currentWeight: number, pre-fills the input with today's value
-//   - onUpdateWeight: function(newWeight) => void
-// ==============================================================
 function UpdateWeightForm({ currentWeight, onUpdateWeight }) {
   const [weight, setWeight] = useState(currentWeight);
 
@@ -166,20 +149,6 @@ function UpdateWeightForm({ currentWeight, onUpdateWeight }) {
   );
 }
 
-// ==============================================================
-// BMICalculatorForm Component
-// --------------------------------------------------------------
-// Props:
-//   - defaultWeight: number, pre-fills the weight field (kg)
-//   - onCalculated: function(bmiValue) => void, called after the
-//     BMI is calculated so the parent can update the BMI stat card
-//
-// State:
-//   - weight, heightCm: the two form inputs
-//   - result: the calculated BMI (null until "Calculate" is clicked)
-//
-// Formula: BMI = weight(kg) / (height(m))^2
-// ==============================================================
 function BMICalculatorForm({ defaultWeight, defaultHeight = 170, onCalculated }) {
   const [weight, setWeight] = useState(defaultWeight);
   const [heightCm, setHeightCm] = useState(defaultHeight);
@@ -228,13 +197,6 @@ function BMICalculatorForm({ defaultWeight, defaultHeight = 170, onCalculated })
   );
 }
 
-// ==============================================================
-// AddGoalForm Component
-// --------------------------------------------------------------
-// Props:
-//   - onAddGoal: function(goalData) => void, where goalData is
-//     { title, current, target, unit }
-// ==============================================================
 function AddGoalForm({ onAddGoal, initialGoal }) {
   const [title, setTitle] = useState(initialGoal?.title || "");
   const [current, setCurrent] = useState(initialGoal ? String(initialGoal.current) : "");
